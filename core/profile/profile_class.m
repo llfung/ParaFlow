@@ -1,8 +1,8 @@
 classdef profile_class
     properties
         mesh_obj
-        prof %Profile Vector 
-        N %Size of profile vector
+        prof % Profile Vector 
+        N    % Size of profile vector
     end
     methods (Abstract)
         set_prof(obj,settings)
