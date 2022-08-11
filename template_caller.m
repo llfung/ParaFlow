@@ -4,7 +4,7 @@ addpath('./');
 addpath('./core/');
 addpath('./core/mesh');
 addpath('./core/profile/');
-addpath('./core/stab/');
+% addpath('./core/stab/');
 addpath(genpath('./app/'));
 %% ------ Initialization --------------------------------------------------
 % Parameters
