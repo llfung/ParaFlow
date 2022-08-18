@@ -1,4 +1,4 @@
-classdef NSTrans_Hbase_VDlib < solv_prof
+classdef NSTrans_VDlib < solv_prof
     properties (GetAccess=public, SetAccess=private)
         Re
         Pe_s
@@ -7,7 +7,7 @@ classdef NSTrans_Hbase_VDlib < solv_prof
     end
     methods
         %% Constructor
-        function obj=NSTrans_Hbase_VDlib(mesh_obj,settings,ini_prof)
+        function obj=NSTrans_VDlib(mesh_obj,settings,ini_prof)
             switch nargin
                 case 2
                     super_args{1}=mesh_obj;

@@ -24,7 +24,7 @@ mesh=chebyshev(N_mesh,4,bc_type.none,tran_type.none);
 % Solving for base flow
 settings.disp_iter=true;
 
-prof_obj=NSTrans_Hbase_VDlib(mesh,settings);
+prof_obj=NSTrans_VDlib(mesh,settings);
 prof_obj=prof_obj.solve();
 
 U0=prof_obj.prof(2:N_mesh+1);
