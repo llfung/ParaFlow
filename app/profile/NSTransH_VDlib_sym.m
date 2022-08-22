@@ -76,11 +76,11 @@ classdef NSTransH_VDlib_sym < solv_prof
 %             D2H0=D2M*H0;
 
             % Residue of equation 1
-            lhs1=(wint*U0)-obj.Q/2;
+            lhs1=(wint*U0)-obj.Q;
             if obj.Q==0
                 res1=abs(lhs1);
             else
-                res1=abs(lhs1)/obj.Q*2;
+                res1=abs(lhs1)/obj.Q;
             end
             % Residue of equation 2
             Nbar=ones(N,1);
@@ -102,7 +102,7 @@ classdef NSTransH_VDlib_sym < solv_prof
             lhs3(end)=DH0(end);
             
             % Residue of equation 4
-            lhs4=(wint*exp(H0))-1/2;
+            lhs4=(wint*exp(H0))-1.;
             res4=abs(lhs4);
 
             % Combining Residues
@@ -170,8 +170,8 @@ classdef NSTransH_VDlib_sym < solv_prof
                 obj.x0=x0;
             else
                 G=0;
-                U0=obj.Q/4*3*((1-obj.mesh_obj.pts.^2));%+sin(pi*obj.mesh_obj.pts));
-                H0=log(1/2)*ones(obj.mesh_obj.N,1);
+                U0=obj.Q/2*3*((1-obj.mesh_obj.pts.^2));%+sin(pi*obj.mesh_obj.pts));
+                H0=zeros(obj.mesh_obj.N,1);
 
                 obj.x0=[G;U0;H0];
             end

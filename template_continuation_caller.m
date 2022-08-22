@@ -9,9 +9,9 @@ addpath(genpath('./app/'));
 %% ------ Initialization --------------------------------------------------
 % Parameters
 settings.Re=1;      % Reynolds number based on half width and swimming speed
-settings.Gamma=-10;      % Dimensionless gravitational force (Richardson number)
+settings.Gamma=10;      % Dimensionless gravitational force (Richardson number)
 settings.Pe_s=1;      % Swimming Peclet Number
-settings.Q=-.01;          % Flow rate setting
+settings.Q=-.001;          % Flow rate setting
 
 %% ------ Mesh Initialization ---------------------------------------------
 N_mesh=175; %Number of mesh points (in r direction)
@@ -27,13 +27,13 @@ settings.epsilon=1e-8;
 settings.limiter_value=1000; % Stop iteration if N(0)>1000
 settings.limiter_index=2*N_mesh+1; % Index for N(0)
 
-cont_obj=NSTransH_VDlib_contRi_sym(mesh,settings,.1,1000,1);
+cont_obj=NSTransH_VDconst_contRi_sym(mesh,settings,0.1,100,1);
 cont_obj=cont_obj.run_cont_forward();
 
 %% Plotting
 figure(4);hold on;
 %plot(cont_obj.para_out,cont_obj.x_out(1+N_mesh+floor((N_mesh+1)/2),:));
-plot(cont_obj.para_out,cont_obj.x_out(1+N_mesh,:));
+plot(cont_obj.para_out/pi^2,cont_obj.x_out(1+N_mesh,:));
 
 figure(2);
 subplot(2,1,1);

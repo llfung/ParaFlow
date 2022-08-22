@@ -9,7 +9,7 @@ classdef NSTransH_VDlib_contRi_sym < ode_continuation
         %% Constructor
         function obj=NSTransH_VDlib_contRi_sym(mesh_obj,settings,h,num_iter,save_iter,x0)
             if nargin<4
-                error('osp_Hbase_iter_const_continRi: Not enough Input argument');
+                error('NSTransH_VDlib_contRi_sym: Not enough Input argument');
             else
                 super_args{5}=num_iter;
                 super_args{4}=h;
@@ -90,11 +90,11 @@ classdef NSTransH_VDlib_contRi_sym < ode_continuation
             % D2H0=D2M*H0;
             
             % Residue of equation 1 (Flow Rate)
-            lhs1=(wint*U0)-obj.Q/2;
+            lhs1=(wint*U0)-obj.Q;
             if obj.Q==0
                 res1=abs(lhs1);
             else
-                res1=abs(lhs1)/obj.Q*2;
+                res1=abs(lhs1)/obj.Q;
             end
 
             % Residue of equation 2 (Navier-Stokes)
@@ -117,7 +117,7 @@ classdef NSTransH_VDlib_contRi_sym < ode_continuation
             lhs3(end)=DH0(end);
 
             % Residue of equation 4 (Conservation of N)
-            lhs4=(wint*exp(H0))-1/2;
+            lhs4=(wint*exp(H0))-1.;
             res4=abs(lhs4);
 
             % Residue of Parameter orthogonal vector
@@ -146,7 +146,7 @@ classdef NSTransH_VDlib_contRi_sym < ode_continuation
             lib_value.DD11=differentiate(loadmat.D11fitobject,S); 
         end
         function dfdx=dfdx_infun(obj,y,lib_value,z)
-            V1=lib_value.V1*obj.Pe_s;
+            %V1=lib_value.V1*obj.Pe_s;
             DV1=lib_value.DV1*obj.Pe_s;
             D11=lib_value.D11*obj.Pe_s^2;
             DD11=lib_value.DD11*obj.Pe_s^2;

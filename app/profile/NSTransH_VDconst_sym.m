@@ -1,4 +1,4 @@
-classdef NSTrans_VDlib < solv_prof
+classdef NSTransH_VDconst_sym < solv_prof
     properties (GetAccess=public, SetAccess=private)
         Re
         Pe_s
@@ -7,7 +7,7 @@ classdef NSTrans_VDlib < solv_prof
     end
     methods
         %% Constructor
-        function obj=NSTrans_VDlib(mesh_obj,settings,ini_prof)
+        function obj=NSTransH_VDconst_sym(mesh_obj,settings,ini_prof)
             switch nargin
                 case 2
                     super_args{1}=mesh_obj;
@@ -67,37 +67,44 @@ classdef NSTrans_VDlib < solv_prof
             % Extracting x
             G=x(1);
             U0=x(2:N+1);
-            N0=x(N+2:2*N+1);
+            H0=x(N+2:2*N+1);
 
             % Differentiating
-%             DU0=D1M*U0;
+            DU0=D1M*U0;
             D2U0=D2M*U0;
-            DN0=D1M*N0;
-%             D2N0=D2M*N0;
+            DH0=D1M*H0;
+%             D2H0=D2M*H0;
 
             % Residue of equation 1
-            lhs1=(wint*U0)-obj.Q*2;
+            lhs1=(wint*U0)-obj.Q;
             if obj.Q==0
                 res1=abs(lhs1);
             else
-                res1=abs(lhs1)/obj.Q*2;
+                res1=abs(lhs1)/obj.Q;
             end
             % Residue of equation 2
             Nbar=ones(N,1);
-            lhs2=-G+1/obj.Re*D2U0-obj.Gamma*(N0-Nbar);
-            lhs2(end)=U0(end);
-            lhs2(1)=U0(1);
-            if any(U0)
+            lhs2=-G+1/obj.Re*D2U0-obj.Gamma*(exp(H0)-Nbar);
+            lhs2(end)=0;
+            lhs2(1)=0;
+            if any(U0) && sqrt(U0'*diag(wint)*U0)>5e-4
                 res2=sqrt(lhs2'*diag(wint)*lhs2)/sqrt(U0'*diag(wint)*U0);
             else
                 res2=sqrt(lhs2'*diag(wint)*lhs2);
             end
+            lhs2(end)=DU0(end);
+            lhs2(1)=U0(1);
+
             % Residue of equation 3
-            lhs3=D11.*DN0-V1.*N0;
-            res3=sqrt(lhs3'*diag(wint)*lhs3)/sqrt(N0'*diag(wint)*N0);
+            lhs3=D11.*DH0-V1;
+            lhs2(end)=0;
+            res3=sqrt(lhs3'*diag(wint)*lhs3)/sqrt(H0'*diag(wint)*H0);
+            lhs3(end)=DH0(end);
+            
             % Residue of equation 4
-            lhs4=(wint*N0)-2.;
+            lhs4=(wint*exp(H0))-1.;
             res4=abs(lhs4);
+
             % Combining Residues
             lhs=[lhs1; lhs2; lhs4; lhs3(2:end)];
             res=res1+res2+res3+res4;
@@ -107,21 +114,16 @@ classdef NSTrans_VDlib < solv_prof
             %e0rv is the interpolated <er> vector in the N points, so for r between 1 and 0.
             %Drr is the diffusivity vector between 1 and 0.
             %er and DDrr are the matrix whose diagonal terms are der/domegapsi (noted Dpsie0r here) and dDrr/domegapsi
-            persistent loadmat
-            if isempty(loadmat)
-                loadmat=load('./GTD3D_libp_beta22_fit.mat','e1fitobject','D11fitobject');
-            end
-            %% Compute S
             U0=y(2:obj.mesh_obj.N+1);
             S=obj.mesh_obj.D(1)*U0;
             %% Interpolate
-            lib_value.V1=loadmat.e1fitobject(S);
-            lib_value.D11=loadmat.D11fitobject(S);
-            lib_value.DV1=differentiate(loadmat.e1fitobject,S);
-            lib_value.DD11=differentiate(loadmat.D11fitobject,S); 
+            lib_value.V1=-S;
+            lib_value.D11=ones(obj.mesh_obj.N,1);
+            lib_value.DV1=-ones(obj.mesh_obj.N,1);
+            lib_value.DD11=zeros(obj.mesh_obj.N,1);
         end
         function dfdx=dfdx_infun(obj,y,lib_value)
-            V1=lib_value.V1*obj.Pe_s;
+            %V1=lib_value.V1*obj.Pe_s;
             DV1=lib_value.DV1*obj.Pe_s;
             D11=lib_value.D11*obj.Pe_s^2;
             DD11=lib_value.DD11*obj.Pe_s^2;
@@ -132,26 +134,29 @@ classdef NSTrans_VDlib < solv_prof
             wint=obj.mesh_obj.wint;
 
             % Extracting x
-            N0=y(N+2:2*N+1);
-            DN0=D1M*N0;
+            H0=y(N+2:2*N+1);
+            DH0=D1M*H0;
 
             % Setting Jacobian
             dfdx1=[0  wint zeros(1,N)];
 
-            dfdx2=[-ones(obj.mesh_obj.N,1) 1/obj.Re.*(D2M)   -obj.Gamma*obj.mesh_obj.I];
+            dfdx2=[-ones(obj.mesh_obj.N,1) 1/obj.Re.*(D2M)   -obj.Gamma*diag(exp(H0))];
             % boundary conditions for u
             dfdx2(1,:)=0;
             dfdx2(N,:)=0;
-            dfdx2(1,2)=1.;               %U0(x=-1)=0
-            dfdx2(N,N+1)=1;              %U0(x= 1)=0
+            dfdx2(1,2) = 1.;                 % U0(x = 1)=0
+            dfdx2(N,2:N+1) = D1M(end,:);     %DU0(x = 0)=0
 
-            Lnv=diag(DN0.*DD11)...
-                -diag(N0.*DV1);
-            Lnn=diag(D11)*D1M-diag(V1);
+            Lnv=diag(DH0.*DD11)*D1M...
+                -diag(DV1)*D1M;
+            Lnn=diag(D11)*D1M;
 
             dfdx3 =[ zeros(N,1)     Lnv       Lnn] ;
+            % boundary conditions for N
+            dfdx3(N,:) = 0;
+            dfdx3(N,N+2:2*N+1) = D1M(N,:);     %DH0(x = 0)=0
 
-            dfdx4=[0  zeros(1,N) wint];
+            dfdx4=[0  zeros(1,N) wint*diag(exp(H0))];
 
             dfdx=[dfdx1; dfdx2;dfdx4;dfdx3(2:end,:)];
         end
@@ -160,10 +165,10 @@ classdef NSTrans_VDlib < solv_prof
                 obj.x0=x0;
             else
                 G=0;
-                U0=obj.Q/2*3*(1-obj.mesh_obj.pts.*obj.mesh_obj.pts);
-                N0=ones(obj.mesh_obj.N,1)/2;
+                U0=obj.Q/2*3*((1-obj.mesh_obj.pts.^2));%+sin(pi*obj.mesh_obj.pts));
+                H0=zeros(obj.mesh_obj.N,1);
 
-                obj.x0=[G;U0;N0];
+                obj.x0=[G;U0;H0];
             end
         end
     end

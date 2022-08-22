@@ -16,21 +16,20 @@ settings.Q=-0.01;          % Flow rate setting
 N_mesh=101; %Number of mesh points (in r direction)
 
 % Generating Chebyshev Collocation Points and Differential Matrices
-mesh=chebyshev(N_mesh,2,bc_type.none,tran_type.lin);
+mesh=chebyshev(N_mesh,2,bc_type.none,tran_type.none);
 % mesh=cfd6(N_mesh,4,bc_type.none);
 
 %% ------ Profile Initialization ------------------------------------------
 G0=0;
-U0=(1-mesh.pts.^2)*3/4*settings.Q;
-%U0=cos(3*pi*mesh.pts/2)*3*pi/2*settings.Q;
-H0=log(1/2)*ones(N_mesh,1);
+U0=(1-mesh.pts.^2)*3/2*settings.Q;
+H0=ones(N_mesh,1);
 
 x0=[G0;U0;H0];
 %% ------ Solve for basic state--------------------------------------------
 % Solving for base flow
 settings.disp_iter=true;
 
-prof_obj=NSTransH_VDlib_sym(mesh,settings,x0);
+prof_obj=NSTrans_VDlib(mesh,settings,x0);
 prof_obj=prof_obj.solve();
 
 U0=prof_obj.prof(2:N_mesh+1);

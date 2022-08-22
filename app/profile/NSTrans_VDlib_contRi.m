@@ -9,7 +9,7 @@ classdef NSTrans_VDlib_contRi < ode_continuation
         %% Constructor
         function obj=NSTrans_VDlib_contRi(mesh_obj,settings,h,num_iter,save_iter,x0)
             if nargin<4
-                error('osp_Hbase_iter_const_continRi: Not enough Input argument');
+                error('NSTrans_VDlib_contRi: Not enough Input argument');
             else
                 super_args{5}=num_iter;
                 super_args{4}=h;
@@ -90,11 +90,11 @@ classdef NSTrans_VDlib_contRi < ode_continuation
             % D2N0=D2M*N0;
             
             % Residue of equation 1 (Flow Rate)
-            lhs1=(wint*U0)-obj.Q;
+            lhs1=(wint*U0)-obj.Q*2;
             if obj.Q==0
                 res1=abs(lhs1);
             else
-                res1=abs(lhs1)/obj.Q;
+                res1=abs(lhs1)/obj.Q/2;
             end
 
             % Residue of equation 2 (Navier-Stokes)
@@ -115,7 +115,7 @@ classdef NSTrans_VDlib_contRi < ode_continuation
             res3=sqrt(lhs3'*diag(wint)*lhs3)/sqrt(N0'*diag(wint)*N0);
 
             % Residue of equation 4 (Conservation of N)
-            lhs4=(wint*N0)-1.;
+            lhs4=(wint*N0)-2.;
             res4=abs(lhs4);
 
             % Residue of Parameter orthogonal vector
