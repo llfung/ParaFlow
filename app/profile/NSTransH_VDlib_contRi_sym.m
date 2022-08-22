@@ -129,21 +129,21 @@ classdef NSTransH_VDlib_contRi_sym < ode_continuation
             res=res1+res2+res3+res4+res5;
         end
         function lib_value = lib_read(obj,y)
-            %V1 is the interpolated <er> vector in the N points, so for r between 1 and 0.
-            %D11 is the diffusivity vector between 1 and 0.
-            %DV1 and DD11 are the matrix whose diagonal terms are dV1/dS and dD11/dS
+            %e0rv is the interpolated <er> vector in the N points, so for r between 1 and 0.
+            %Drr is the diffusivity vector between 1 and 0.
+            %er and DDrr are the matrix whose diagonal terms are der/domegapsi (noted Dpsie0r here) and dDrr/domegapsi
             persistent loadmat
             if isempty(loadmat)
-                loadmat=load('./GTD3D_libp_beta22_fit.mat','e1fitobject','D11fitobject');
+                loadmat=load('./lib.mat','G13_lib','pavg1_lib','Dpavg_1','DD_temp1','D_temp1');
             end
             %% Compute S
             U0=y(2:obj.mesh_obj.N+1);
             S=obj.mesh_obj.D(1)*U0;
             %% Interpolate
-            lib_value.V1=loadmat.e1fitobject(S);
-            lib_value.D11=loadmat.D11fitobject(S);
-            lib_value.DV1=differentiate(loadmat.e1fitobject,S);
-            lib_value.DD11=differentiate(loadmat.D11fitobject,S); 
+            lib_value.V1=interp1([-loadmat.G13_lib(end:-1:1) loadmat.G13_lib],[-loadmat.pavg1_lib(end:-1:1) loadmat.pavg1_lib],S);
+            lib_value.D11=interp1([-loadmat.G13_lib(end:-1:1) loadmat.G13_lib],[loadmat.D_temp1(end:-1:1) loadmat.D_temp1],S);
+            lib_value.DV1=interp1([-loadmat.G13_lib(end:-1:1) loadmat.G13_lib],[loadmat.Dpavg_1(end:-1:1) loadmat.Dpavg_1],S);
+            lib_value.DD11=interp1([-loadmat.G13_lib(end:-1:1) loadmat.G13_lib],[-loadmat.DD_temp1(end:-1:1) loadmat.DD_temp1],S); 
         end
         function dfdx=dfdx_infun(obj,y,lib_value,z)
             %V1=lib_value.V1*obj.Pe_s;
