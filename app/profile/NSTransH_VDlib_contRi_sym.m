@@ -98,7 +98,7 @@ classdef NSTransH_VDlib_contRi_sym < ode_continuation
             end
 
             % Residue of equation 2 (Navier-Stokes)
-            Nbar=ones(N,1)/2;
+            Nbar=ones(N,1);
             lhs2=-G+1/obj.Re*D2U0-Gamma*(exp(H0)-Nbar);
             lhs2(end)=0;
             lhs2(1)=0;
@@ -165,7 +165,7 @@ classdef NSTransH_VDlib_contRi_sym < ode_continuation
             % (Flow Rate)
             dfdx1 = [0  wint zeros(1,N+1)];
             % (Navier-Stokes)
-            dfdx2 = [-ones(obj.mesh_obj.N,1)  1/obj.Re*(D2M)  -Gamma*diag(exp(H0)) -(exp(H0)-1/2)];
+            dfdx2 = [-ones(obj.mesh_obj.N,1)  1/obj.Re*(D2M)  -Gamma*diag(exp(H0)) -(exp(H0)-1)];
             % boundary conditions for u
             dfdx2(1,:) = 0;
             dfdx2(N,:) = 0;

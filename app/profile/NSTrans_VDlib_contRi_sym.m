@@ -98,7 +98,7 @@ classdef NSTrans_VDlib_contRi_sym < ode_continuation
             end
 
             % Residue of equation 2 (Navier-Stokes)
-            Nbar=ones(N,1)/2;
+            Nbar=ones(N,1);
             lhs2=-G+1/obj.Re*D2U0-Gamma*(N0-Nbar);
             lhs2(end)=0;
             lhs2(1)=0;
@@ -162,7 +162,7 @@ classdef NSTrans_VDlib_contRi_sym < ode_continuation
             Gamma=y(2*N+2);
 
             % Preparing Utils
-            Nbar=ones(N,1)/2;
+            Nbar=ones(N,1);
 
             % Preparing Jacobian 
             % (Flow Rate)

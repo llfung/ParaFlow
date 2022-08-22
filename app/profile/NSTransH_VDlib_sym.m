@@ -83,7 +83,7 @@ classdef NSTransH_VDlib_sym < solv_prof
                 res1=abs(lhs1)/obj.Q*2;
             end
             % Residue of equation 2
-            Nbar=ones(N,1)/2;
+            Nbar=ones(N,1);
             lhs2=-G+1/obj.Re*D2U0-obj.Gamma*(exp(H0)-Nbar);
             lhs2(end)=0;
             lhs2(1)=0;
