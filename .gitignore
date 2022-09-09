@@ -1,3 +1,4 @@
 # *.mat
 *.MATLABDriveTag
 *.asv
+*.DS_store
