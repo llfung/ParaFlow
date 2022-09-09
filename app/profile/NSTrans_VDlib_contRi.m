@@ -127,20 +127,17 @@ classdef NSTrans_VDlib_contRi < ode_continuation
             res=res1+res2+res3+res4+res5;
         end
         function lib_value = lib_read(obj,y)
-            %V1 is the interpolated <er> vector in the N points, so for r between 1 and 0.
-            %D11 is the diffusivity vector between 1 and 0.
-            %DV1 and DD11 are the matrix whose diagonal terms are dV1/dS and dD11/dS
             persistent loadmat
             if isempty(loadmat)
-                loadmat=load('./GTD3D_libp_beta22_fit.mat','e1fitobject','D11fitobject');
+                loadmat=load('./Sinking_B0.31_libG13_fit.mat','pavg1fitobject','D11fitobject');
             end
             %% Compute S
             U0=y(2:obj.mesh_obj.N+1);
             S=obj.mesh_obj.D(1)*U0;
             %% Interpolate
-            lib_value.V1=loadmat.e1fitobject(S);
+            lib_value.V1=loadmat.pavg1fitobject(S);
             lib_value.D11=loadmat.D11fitobject(S);
-            lib_value.DV1=differentiate(loadmat.e1fitobject,S);
+            lib_value.DV1=differentiate(loadmat.pavg1fitobject,S);
             lib_value.DD11=differentiate(loadmat.D11fitobject,S); 
         end
         function dfdx=dfdx_infun(obj,y,lib_value,z)
