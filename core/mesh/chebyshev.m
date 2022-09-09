@@ -25,27 +25,18 @@ classdef chebyshev < mesh_class
             else
                 obj.pix=pix;
             end
-            obj.N_original=siz;
+            obj.N_original=uint16(siz);
 
-            [obj.pts,obj.DM]=chebdif(obj.N,M);
+            %[obj.pts,obj.DM]=chebdif(obj.N,M);
 
             if nargin < 3
                 obj.bc_opt=bc_type.none;
-            else
-                obj=bc(obj,bc_opt);
             end
+            obj=bc(obj,bc_opt);
             if nargin < 4
                 obj.tran_opt=tran_type.none;
-                obj.wint=Chebyweight_infun(siz);
-            else
-                obj=tran(obj,tran_opt);
-                if tran_opt==tran_type.lin
-                    obj.wint=Chebyweight_infun(siz)./2;
-                end
-                if tran_opt==tran_type.none
-                    obj.wint=Chebyweight_infun(siz);
-                end
             end
+            obj=tran(obj,tran_opt);
         end
         %% Inherent Abstract Class
         function integ=int(obj,v)
@@ -107,68 +98,70 @@ classdef chebyshev < mesh_class
                 integ=integ+2*a(l)/(1-(l-1)^2);
             end
             %integ=real(integ);
-                end
+        end
         %% Functions specific to chebyshev
         function obj=bc(obj,bc_opt)
             if nargin < 2
-                if obj.M > 3
-                    bc_opt=bc_type.b4c;
-                else
-                    bc_opt=bc_type.dirichlet;
-                end
+                bc_opt=bc_type.none;
             end
             switch bc_opt
                 case bc_type.none
-                    obj.N=obj.N_original;
+                    
                     [obj.pts,obj.DM]=chebdif(obj.N,obj.M);
+
+                    obj.N=obj.N_original;
+
                 case bc_type.b4c
-                    if obj.N~=obj.N_original
-                        [obj.pts,obj.DM]=chebdif(obj.N_original,obj.M);
-                    end
+                    
+                    [obj.pts,obj.DM]=chebdif(obj.N_original,obj.M);
+                    
                     obj.DM=obj.DM(2:end-1,2:end-1,:);
                     obj.pts=obj.pts(2:end-1);
                     obj.DM(:,:,4)=cheb4c(obj.N_original);
                     obj.N=obj.N_original-2;
+
                 case bc_type.dirichlet
-                    if obj.N~=obj.N_original
-                        [obj.pts,obj.DM]=chebdif(obj.N_original,obj.M);
-                    end
+                    
+                    [obj.pts,obj.DM]=chebdif(obj.N_original,obj.M);
+                    
                     obj.DM=obj.DM(2:end-1,2:end-1,:);
                     obj.pts=obj.pts(2:end-1);
                     obj.N=obj.N_original-2;
-                %case bc_type.robin %Not yet implemented
+
+                %case bc_type.robin %TODO: Not yet implemented
+
                 case bc_type.dirichlet_up
-                    if obj.N~=obj.N_original
-                        [obj.pts,obj.DM]=chebdif(obj.N_original,obj.M);
-                    end
+                    
+                    [obj.pts,obj.DM]=chebdif(obj.N_original,obj.M);
+                    
                     obj.DM=obj.DM(2:end,2:end,:);
                     obj.pts=obj.pts(2:end);
                     obj.N=obj.N_original-1;
+
                case bc_type.dirichlet_low
-                    if obj.N~=obj.N_original
-                        [obj.pts,obj.DM]=chebdif(obj.N_original,obj.M);
-                    end
+                    
+                    [obj.pts,obj.DM]=chebdif(obj.N_original,obj.M);
+                    
                     obj.DM=obj.DM(1:end-1,1:end-1,:);
                     obj.pts=obj.pts(1:end-1);
                     obj.N=obj.N_original-1;
-%                 case clamped_up_dirichlet_low
-%                     if obj.N~=obj.N_original
-%                         [obj.col_pt,obj.DM]=chebdif(obj.N_original,obj.M);
-%                     end
+
+%                 case clamped_up_dirichlet_low %TODO
+
+%                     [obj.col_pt,obj.DM]=chebdif(obj.N_original,obj.M);
+
 %                     obj.DM=obj.DM(1:end-1,1:end-1,:);
 %                     obj.col_pt=obj.col_pt(1:end-1);
 %                     obj.N=obj.N_original-1;
+
                 otherwise
                     error('Unknown Boundary Condition Type');
             end
             obj.bc_opt=bc_opt;
         end
-
-
-
         function obj=tran(obj,tran_opt)
             if nargin < 2
-                    tran_opt=tran_type.tan;
+                tran_opt=tran_type.none;
             end
             switch tran_opt
                 case tran_type.none
@@ -240,7 +233,23 @@ classdef chebyshev < mesh_class
                     end
                     obj.pts=y;
             end
-            
+            obj.wint=Chebyweight_infun(double(obj.N_original));
+            switch obj.bc_opt
+                case bc_type.none
+                case bc_type.dirichlet_up
+                    obj.wint = obj.wint(2:end);
+                case bc_type.dirichlet_low
+                    obj.wint = obj.wint(1:end-1);
+                case {bc_type.b4c,bc_type.dirichlet}
+                    obj.wint = obj.wint(2:end-1);
+                case bc_type.periodic
+                    warning('wint unsupported'); %TODO
+                otherwise
+                    error('Unknown Boundary Condition Type');
+            end
+            if tran_opt~=tran_type.none
+                obj.wint=obj.wint./transpose(dy);
+            end
             obj.tran_opt=tran_opt;
         end
         %% Legacy
@@ -391,7 +400,7 @@ end
 function [wint]=Chebyweight_infun(N)
 %% Chebyshev Collocation Integrating weight factors
     wint=zeros(1,N);
-    for iy=0:N-1
+    for iy=0:floor((N+1)/2)-1
       wint(iy+1)=-.5;
         for ni=0:(N+1)/2-3
            wint(iy+1) = wint(iy+1) + cos(pi*(2*(ni+1)*iy)/(N-1))/((2*(ni+1))^2-1);   
@@ -402,4 +411,5 @@ function [wint]=Chebyweight_infun(N)
             wint(iy+1)=wint(iy+1)*.5;
         end
     end
+    wint(floor((N+1)/2)+1:N)=fliplr(wint(1:floor(N/2)));
 end
