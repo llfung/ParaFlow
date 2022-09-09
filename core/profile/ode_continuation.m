@@ -116,7 +116,7 @@ classdef (Abstract) ode_continuation
             breakflag=false;
             
             %warning supression
-            warning('off','all');
+%             warning('off','all');
 
             %% Iteration for continuation
             for j=1:obj.total_iter
@@ -170,7 +170,7 @@ classdef (Abstract) ode_continuation
 
             end
             %warning back on
-            warning('on','all');
+%             warning('on','all');
         end
     end
 end
