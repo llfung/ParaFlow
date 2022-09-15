@@ -32,7 +32,7 @@ U0=zeros(N_mesh,1);%0.00001*cos(pi*mesh.col_pt);
 U0=U0-U0(1);
 Q=mesh.wint*U0;
 H0=zeros(N_mesh,1);
-cont_obj=NSTransH_VDlib_contRi_G0_sym(mesh,settings,0.2,100,1,[Q;U0;H0]);
+cont_obj=NSTransH_VDconst_contRi_G0_sym(mesh,settings,0.2,1000,1,[Q;U0;H0]);
 cont_obj=cont_obj.run_cont_forward();
 
 %% Plotting
