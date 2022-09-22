@@ -97,7 +97,7 @@ classdef NSTransH_VDlib_G0_sym < solv_prof
 
             % Residue of equation 3
             lhs3=D11.*DH0-V1;
-            lhs2(end)=0;
+            lhs3(end)=0;
             res3=sqrt(lhs3'*diag(wint)*lhs3)/sqrt(H0'*diag(wint)*H0);
             lhs3(end)=DH0(end);
             
