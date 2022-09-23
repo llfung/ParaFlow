@@ -112,7 +112,7 @@ classdef NSTransH_VDconst_contRi_G0_sym < ode_continuation
             
             % Residue of equation 3 (Transport, integrated)
             lhs3=D11.*DH0-V1;
-            lhs2(end)=0;
+            lhs3(end)=0;
             res3=sqrt(lhs3'*diag(wint)*lhs3)/sqrt(H0'*diag(wint)*H0);
             lhs3(end)=DH0(end);
 
