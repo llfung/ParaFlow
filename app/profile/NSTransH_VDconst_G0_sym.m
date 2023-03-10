@@ -117,7 +117,7 @@ classdef NSTransH_VDconst_G0_sym < solv_prof
             %% Compute S
             U0=y(2:obj.mesh_obj.N+1);
             S=obj.mesh_obj.D(1)*U0;
-            B=1;
+            B=1.0;
             %% Interpolate
             lib_value.V1=-B*S;
             lib_value.D11=ones(obj.mesh_obj.N,1);
