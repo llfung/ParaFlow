@@ -135,7 +135,7 @@ classdef NSTransH_VDconst_contRi_G0_sym < ode_continuation
             %% Compute S
             U0=y(2:obj.mesh_obj.N+1);
             S=obj.mesh_obj.D(1)*U0;
-            B=1;
+            B=0.93;
             %% Interpolate
             lib_value.V1=-B*S;
             lib_value.D11=ones(obj.mesh_obj.N,1);

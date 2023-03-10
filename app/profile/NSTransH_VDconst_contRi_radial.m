@@ -136,10 +136,11 @@ classdef NSTransH_VDconst_contRi_radial < ode_continuation
             %% Compute S
             U0=y(2:obj.mesh_obj.N+1);
             S=obj.mesh_obj.D(1)*U0;
+            B=1.1;
             %% Interpolate
-            lib_value.V1=-S;
+            lib_value.V1=-B*S;
             lib_value.D11=ones(obj.mesh_obj.N,1);
-            lib_value.DV1=-ones(obj.mesh_obj.N,1);
+            lib_value.DV1=-B*ones(obj.mesh_obj.N,1);
             lib_value.DD11=zeros(obj.mesh_obj.N,1);
         end
         function dfdx=dfdx_infun(obj,y,lib_value,z)
